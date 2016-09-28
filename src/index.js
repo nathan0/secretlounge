@@ -20,7 +20,7 @@ import { RANKS } from './ranks'
 import { setCache, delCache, createCacheGroup, getCacheGroup } from './cache'
 import {
   getUser, getUsers, setRank, isActive, addUser, rejoinUser, updateUser, delUser,
-  getSystemConfig
+  getSystemConfig, rmWarning
 } from './db'
 import commands from './commands'
 import { HOURS } from './time'
@@ -32,8 +32,18 @@ import {
   SCORE_MESSAGE,
   SCORE_LINK,
   SCORE_STICKER,
-  SCORE_CHARACTER
+  SCORE_CHARACTER,
+  WARN_EXPIRE
 } from './constants'
+
+// remove warnings every half hour
+setInterval(() => {
+  getUsers().map((user) => {
+    if (user.warnUpdated + WARN_EXPIRE <= Date.now()) {
+      rmWarning(user.id)
+    }
+  })
+}, 0.5 * HOURS)
 
 const parseEvent = (rawEvent) => {
   if (typeof rawEvent === 'string') return { type: 'message', text: rawEvent }
@@ -213,7 +223,7 @@ networks.on('command', (evt, reply) => {
   if (evt && evt.cmd === 'start') { // user (re)joining chat
     if (user && isActive(user)) return reply(cursive(USER_IN_CHAT))
     else if (user && user.banned >= Date.now()) {
-      return reply(cursive(USER_BANNED_FROM_CHAT + ' until ' + stringifyTimestamp(user.banned)))
+      return reply(cursive(USER_BANNED_FROM_CHAT + ' ' + stringifyTimestamp(user.banned)))
     }
     else if (user && (user.kicked || user.banned)) rejoinUser(evt.user)
     else addUser(evt.user)

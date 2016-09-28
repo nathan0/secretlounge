@@ -19,14 +19,39 @@ const getUserWarnings = (id) => {
   else return user.warnings
 }
 
-import { HOURS } from './time'
+import { BASE_COOLDOWN_TIME } from './constants'
+import { MINUTES, HOURS } from './time'
 
-export const warnUser = (id) => db.get('users').find({ id }).assign({ warnings: getUserWarnings(id) + 1 }).value()
+// alias to add a warning to a user
+export const addWarning = (id) => {
+    let warnings = getUserWarnings(id)
+    let cooldownTime = Math.pow(BASE_COOLDOWN_TIME, warnings) * MINUTES
+    // increment user warnings
+    db.get('users').find({ id }).assign({ warnings: warnings + 1 }).value()
+    // set the warning updated time
+    db.get('users').find({ id }).assign({ warnUpdated: Date.now() }).value()
+    // ban the user for a set time
+    kickUser(id)
+    banUser(id, cooldownTime)
+
+    return cooldownTime
+}
+
+export const rmWarning = (id) => {
+    // decrement user warnings
+    let warnings = getUserWarnings(id)
+    if (warnings > 0) {
+        db.get('users').find({ id }).assign({ warnings: warnings - 1 }).value()
+        // set the warning updated time
+        db.get('users').find({ id }).assign({ warnUpdated: Date.now() }).value()
+    }
+}
+
 export const kickUser = (id) => db.get('users').find({ id }).assign({ kicked: true }).value()
-export const banUser = (id) =>
+export const banUser = (id, ms) =>
   db.get('users')
     .find({ id })
-    .assign({ banned: Date.now() + (24 * HOURS) })
+    .assign({ banned: Date.now() + ms })
     .value()
 
 export const isActive = (user) => user && !user.kicked && !user.banned

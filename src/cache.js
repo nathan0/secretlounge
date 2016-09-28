@@ -20,6 +20,16 @@ export const getFromCache = (evt, reply) => {
   return messageRepliedTo
 }
 
+export const setWarnedFlag = (id) => {
+  let { cacheId } = messageHistory[id]
+  messageGroups[cacheId].warned = true;
+}
+
+export const hasWarnedFlag = (id) => {
+  let { cacheId } = messageHistory[id]
+  return messageGroups[cacheId].warned ? true : false
+}
+
 export const setCache = (id, cacheId, sender, receiver) => {
   // add to history
   messageHistory[id] = { sender, cacheId }

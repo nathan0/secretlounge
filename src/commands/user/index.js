@@ -18,9 +18,7 @@ export default function userCommands (user, evt, reply) {
 
 <i>or reply to a message and use:</i>
   /info - to get info about the user that sent this message
-  /warn - to warn the user that sent this message
-  /kick - to kick the user that sent this message
-  /ban - to ban the user that sent this message`))
+  /warn - to warn the user that sent this message`))
       break
 
     case 'adminhelp':
