@@ -23,7 +23,7 @@ const getReason = (evt) =>
 const ERR_NO_REPLY = 'please reply to a message to use this command'
 
 export default function modCommands (user, evt, reply) {
-  let messageRepliedTo
+  let messageRepliedTo, msgId
 
   switch (evt.cmd) {
     case 'modsay':
@@ -46,30 +46,36 @@ export default function modCommands (user, evt, reply) {
 
     case 'delete':
       messageRepliedTo = getFromCache(evt, reply)
-      let replyCache = getCacheGroup(evt && evt.raw && evt.raw.reply_to_message && evt.raw.reply_to_message.message_id)
+      msgId = evt && evt.raw && evt.raw.reply_to_message && evt.raw.reply_to_message.message_id
+      let replyCache = getCacheGroup(msgId)
 
       if (messageRepliedTo) {
-        // for everyone who is not a mod or higher, or not the sender, edit the message this is referencing.
-        getUsers().map((user) => {
-          if (user.rank < RANKS.mod && messageRepliedTo.sender !== user.id) {
-            reply({
-              type: 'editMessageText',
-              chat: user.id,
-              id: replyCache && replyCache[user.id],
-              text: '<i>this message disappeared into the ether</i>',
-              options: {
-                parse_mode: 'HTML'
-              }
-            })
-          }
-        })
-        sendToUser(messageRepliedTo.sender, {
-          ...htmlMessage('<i>this message has now been deleted, only you can see the content of the above message</i>'),
-          options: {
-            reply_to_message_id: evt && evt.raw && evt.raw.reply_to_message && evt.raw.reply_to_message.message_id,
-            parse_mode: 'HTML'
-          }
-        })
+        if (!hasWarnedFlag(msgId)) {
+          const cooldownTime = addWarning(messageRepliedTo.sender)
+          setWarnedFlag(msgId)
+          getUsers().map((user) => {
+            if (messageRepliedTo.sender !== user.id) {
+              reply({
+                type: 'editMessageText',
+                chat: user.id,
+                id: replyCache && replyCache[user.id],
+                text: '<i>this message disappeared into the ether</i>',
+                options: {
+                  parse_mode: 'HTML'
+                }
+              })
+            }
+          });
+          sendToUser(messageRepliedTo.sender, {
+            ...htmlMessage('<i>you\'ve been handed a cooldown of ' + formatTime(cooldownTime) + ' for this message (message was also deleted)</i>'),
+            options: {
+              reply_to_message_id: evt && evt.raw && evt.raw.reply_to_message && evt.raw.reply_to_message.message_id,
+              parse_mode: 'HTML'
+            }
+          })
+        } else {
+          reply(cursive(ALREADY_WARNED))
+        }
       } else {
         reply(cursive(ERR_NO_REPLY))
       }
@@ -77,12 +83,12 @@ export default function modCommands (user, evt, reply) {
 
     case 'warn':
       messageRepliedTo = getFromCache(evt, reply)
-      let cacheId = evt && evt.raw && evt.raw.reply_to_message && evt.raw.reply_to_message.message_id
+      msgId = evt && evt.raw && evt.raw.reply_to_message && evt.raw.reply_to_message.message_id
 
       if (messageRepliedTo) {
-        if (!hasWarnedFlag(cacheId)) {
+        if (!hasWarnedFlag(msgId)) {
           const cooldownTime = addWarning(messageRepliedTo.sender)
-          setWarnedFlag(cacheId)
+          setWarnedFlag(msgId)
           sendToUser(messageRepliedTo.sender, {
             ...htmlMessage('<i>you\'ve been handed a cooldown of ' + formatTime(cooldownTime) + ' for this message</i>'),
             options: {
