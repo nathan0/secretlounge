@@ -70,15 +70,15 @@ export const stringifyTimestamp = (ts) =>
   (new Date(ts)).toUTCString()
 
 export const usersText = (users) =>
-  `<b>${users.length}</b> <i>users:</i> ` + users.map(getUsername).join(', ')
+  `<b>${users.filter(u => !u.left).length}</b> <i>users:</i> ` + users.filter(u => !u.left).map(getUsername).join(', ')
 
 export const infoText = (user) => !user ? '<i>user not found</i>' :
   `<b>id:</b> ${obfuscateId(user.id)}, <b>username:</b> @${user.username}, ` +
   `<b>rank:</b> ${user.rank} (${getRank(user.rank)}), ` +
   `<b>warnings:</b> ${user.warnings || 0} ${generateSmiley(user.warnings)}${ user.warnings > 0 ? ` (one warning will be removed on ${stringifyTimestamp(user.warnUpdated + WARN_EXPIRE)})` : ''}, ` +
-  `<b>cooldown:</b> ${user.banned ? 'yes, until ' + stringifyTimestamp(user.banned) : 'no'}`
+  `<b>cooldown:</b> ${user.banned >= Date.now() ? 'yes, until ' + stringifyTimestamp(user.banned) : 'no'}`
 
 export const modInfoText = (user) => !user ? '<i>user not found</i>' :
   `<b>id:</b> ${obfuscateId(user.id)}, <b>username:</b> anonymous, ` +
   `<b>rank:</b> n/a, ` +
-  `<b>cooldown:</b> ${user.banned ? 'yes, until ' + stringifyTimestamp(user.banned) : 'no'}`
+  `<b>cooldown:</b> ${user.banned >= Date.now() ? 'yes, until ' + stringifyTimestamp(user.banned) : 'no'}`

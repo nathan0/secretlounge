@@ -112,7 +112,7 @@ export const sendToUser = (id, rawEvent) =>
 
 export const sendToAll = (rawEvent) =>
   sendTo(
-    getUsers(),
+    getUsers().filter(u => !u.left),
     rawEvent
   )
 
@@ -136,11 +136,13 @@ const relay = (type) => {
         if ((user.spamScore + calcSpamScore(evt)) > SPAM_LIMIT) return reply(cursive(USER_SPAMMING))
         else increaseSpamScore(user, evt)
       }
-      if (user && isActive(user)) { // make sure user is in the group chat
+      if (user && user.left) { // make sure user is in the group chat
+        reply(cursive(USER_NOT_IN_CHAT))
+      } else if (user && user.banned >= Date.now()) {
+        reply(cursive(USER_BANNED_FROM_CHAT + ' ' + stringifyTimestamp(user.banned)))
+      } else {
         // otherwise, relay event to all users
         sendToAll(evt)
-      } else {
-        reply(cursive(USER_NOT_IN_CHAT))
       }
     }
   })
@@ -168,14 +170,14 @@ const calcSpamScore = (evt) => {
       if (LINK_REGEX.test(evt.text)) {
         return SCORE_MESSAGE + // regular message
           (evt.text.length * SCORE_CHARACTER) + // characters count, still
-          ((evt.text.match(LINK_REGEX) || []).length * SCORE_LINK); // number of links * score
+          ((evt.text.match(LINK_REGEX) || []).length * SCORE_LINK) // number of links * score
       }
 
       return SCORE_MESSAGE + (evt.text.length * SCORE_CHARACTER) // regular message + character count
     default:
       return SCORE_MESSAGE
   }
-};
+}
 
 const increaseSpamScore = (user, evt) => {
   const incSpamScore = calcSpamScore(evt)
@@ -220,13 +222,11 @@ networks.on('command', (evt, reply) => {
   const user = getUser(evt.user)
   if (evt && evt.cmd) evt.cmd = evt.cmd.toLowerCase()
 
-  if (evt && evt.cmd === 'start') { // user (re)joining chat
-    if (user && isActive(user)) return reply(cursive(USER_IN_CHAT))
-    else if (user && user.banned >= Date.now()) {
-      return reply(cursive(USER_BANNED_FROM_CHAT + ' ' + stringifyTimestamp(user.banned)))
-    }
-    else if (user && (user.kicked || user.banned)) rejoinUser(evt.user)
+  if (evt && evt.cmd === 'start') {
+    if (user && !user.left) return reply(cursive(USER_IN_CHAT))
+    else if (user && user.left) rejoinUser(evt.user)
     else addUser(evt.user)
+
     const newUser = updateUserFromEvent(evt)
 
     sendToAll(htmlMessage(

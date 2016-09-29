@@ -22,7 +22,7 @@ export const getFromCache = (evt, reply) => {
 
 export const setWarnedFlag = (id) => {
   let { cacheId } = messageHistory[id]
-  messageGroups[cacheId].warned = true;
+  messageGroups[cacheId].warned = true
 }
 
 export const hasWarnedFlag = (id) => {
