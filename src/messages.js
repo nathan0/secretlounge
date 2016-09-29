@@ -76,9 +76,9 @@ export const infoText = (user) => !user ? '<i>user not found</i>' :
   `<b>id:</b> ${obfuscateId(user.id)}, <b>username:</b> @${user.username}, ` +
   `<b>rank:</b> ${user.rank} (${getRank(user.rank)}), ` +
   `<b>warnings:</b> ${user.warnings || 0} ${generateSmiley(user.warnings)}${ user.warnings > 0 ? ` (one warning will be removed on ${stringifyTimestamp(user.warnUpdated + WARN_EXPIRE)})` : ''}, ` +
-  `<b>kicked:</b> ${user.kicked ? 'yes' : 'no'}, <b>banned:</b> ${user.banned ? stringifyTimestamp(user.banned) : 'no'}`
+  `<b>banned:</b> ${user.banned ? 'yes, until ' + stringifyTimestamp(user.banned) : 'no'}`
 
 export const modInfoText = (user) => !user ? '<i>user not found</i>' :
   `<b>id:</b> ${obfuscateId(user.id)}, <b>username:</b> anonymous, ` +
   `<b>rank:</b> n/a, ` +
-  `<b>kicked:</b> ${user.kicked ? 'yes' : 'no'}, <b>banned:</b> ${user.banned ? stringifyTimestamp(user.banned) : 'no'}`
+  `<b>banned:</b> ${user.banned ? 'yes, until ' + stringifyTimestamp(user.banned) : 'no'}`

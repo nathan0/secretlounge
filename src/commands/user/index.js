@@ -32,7 +32,7 @@ export default function userCommands (user, evt, reply) {
       break
 
     case 'stop':
-      if (!user || user.kicked) return reply(cursive(USER_NOT_IN_CHAT))
+      if (!user || user.banned) return reply(cursive(USER_NOT_IN_CHAT))
       kickUser(evt.user)
       sendToAll(htmlMessage(
         `${getUsername(user)} <i>${USER_LEFT_CHAT}</i>`
