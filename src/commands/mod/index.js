@@ -11,7 +11,7 @@ import {
   getUserByUsername, getUser, getUsers,
   addWarning
 } from '../../db'
-import { ALREADY_WARNED } from '../../messages'
+import { handedCooldown, ALREADY_WARNED, MESSAGE_DISAPPEARED } from '../../messages'
 import { RANKS } from '../../ranks'
 import { formatTime } from '../../time'
 
@@ -23,7 +23,8 @@ const getReason = (evt) =>
 const ERR_NO_REPLY = 'please reply to a message to use this command'
 
 export default function modCommands (user, evt, reply) {
-  let messageRepliedTo, msgId
+  let messageRepliedTo
+  const msgId = evt && evt.raw && evt.raw.reply_to_message && evt.raw.reply_to_message.message_id
 
   switch (evt.cmd) {
     case 'modsay':
@@ -46,7 +47,6 @@ export default function modCommands (user, evt, reply) {
 
     case 'delete':
       messageRepliedTo = getFromCache(evt, reply)
-      msgId = evt && evt.raw && evt.raw.reply_to_message && evt.raw.reply_to_message.message_id
       let replyCache = getCacheGroup(msgId)
 
       if (messageRepliedTo) {
@@ -56,10 +56,10 @@ export default function modCommands (user, evt, reply) {
           getUsers().map((user) => {
             if (messageRepliedTo.sender !== user.id) {
               reply({
+                ...cursive(MESSAGE_DISAPPEARED),
                 type: 'editMessageText',
                 chat: user.id,
                 id: replyCache && replyCache[user.id],
-                text: '<i>this message disappeared into the ether</i>',
                 options: {
                   parse_mode: 'HTML'
                 }
@@ -67,7 +67,7 @@ export default function modCommands (user, evt, reply) {
             }
           });
           sendToUser(messageRepliedTo.sender, {
-            ...htmlMessage('<i>you\'ve been handed a cooldown of ' + formatTime(cooldownTime) + ' for this message (message was also deleted)</i>'),
+            ...cursive(handedCooldown(formatTime(cooldownTime), true)),
             options: {
               reply_to_message_id: evt && evt.raw && evt.raw.reply_to_message && evt.raw.reply_to_message.message_id,
               parse_mode: 'HTML'
@@ -83,14 +83,13 @@ export default function modCommands (user, evt, reply) {
 
     case 'warn':
       messageRepliedTo = getFromCache(evt, reply)
-      msgId = evt && evt.raw && evt.raw.reply_to_message && evt.raw.reply_to_message.message_id
 
       if (messageRepliedTo) {
         if (!hasWarnedFlag(msgId)) {
           const cooldownTime = addWarning(messageRepliedTo.sender)
           setWarnedFlag(msgId)
           sendToUser(messageRepliedTo.sender, {
-            ...htmlMessage('<i>you\'ve been handed a cooldown of ' + formatTime(cooldownTime) + ' for this message</i>'),
+            ...cursive(handedCooldown(formatTime(cooldownTime))),
             options: {
               reply_to_message_id: evt && evt.raw && evt.raw.reply_to_message && evt.raw.reply_to_message.message_id,
               parse_mode: 'HTML'

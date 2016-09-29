@@ -36,7 +36,7 @@ import {
   WARN_EXPIRE
 } from './constants'
 
-// remove warnings every half hour
+// run a check to see if any warnings need removed every half hour
 setInterval(() => {
   getUsers().map((user) => {
     if (user.warnUpdated + WARN_EXPIRE <= Date.now()) {
@@ -112,7 +112,7 @@ export const sendToUser = (id, rawEvent) =>
 
 export const sendToAll = (rawEvent) =>
   sendTo(
-    getUsers().filter(u => !u.left),
+    getUsers(),
     rawEvent
   )
 
@@ -132,18 +132,16 @@ const relay = (type) => {
   networks.on(type, (evt, reply) => {
     if (type !== 'message' || (evt && evt.text && evt.text.charAt(0) !== '/')) { // don't parse commands again
       const user = getUser(evt.user)
-      if (user) {
-        if ((user.spamScore + calcSpamScore(evt)) > SPAM_LIMIT) return reply(cursive(USER_SPAMMING))
-        else increaseSpamScore(user, evt)
-      }
-      if (user && user.left) { // make sure user is in the group chat
-        reply(cursive(USER_NOT_IN_CHAT))
+      if (!isActive(user)) { // make sure user is in the group chat
+        return reply(cursive(USER_NOT_IN_CHAT))
       } else if (user && user.banned >= Date.now()) {
-        reply(cursive(USER_BANNED_FROM_CHAT + ' ' + stringifyTimestamp(user.banned)))
-      } else {
-        // otherwise, relay event to all users
-        sendToAll(evt)
+        return reply(cursive(USER_BANNED_FROM_CHAT + ' ' + stringifyTimestamp(user.banned)))
       }
+
+      if ((user.spamScore + calcSpamScore(evt)) > SPAM_LIMIT) return reply(cursive(USER_SPAMMING))
+      else increaseSpamScore(user, evt)
+
+      sendToAll(evt);
     }
   })
 }
@@ -223,9 +221,9 @@ networks.on('command', (evt, reply) => {
   if (evt && evt.cmd) evt.cmd = evt.cmd.toLowerCase()
 
   if (evt && evt.cmd === 'start') {
-    if (user && !user.left) return reply(cursive(USER_IN_CHAT))
-    else if (user && user.left) rejoinUser(evt.user)
-    else addUser(evt.user)
+    if (isActive(user)) return reply(cursive(USER_IN_CHAT))
+    else if (!user) addUser(evt.user)
+    else rejoinUser(evt.user)
 
     const newUser = updateUserFromEvent(evt)
 

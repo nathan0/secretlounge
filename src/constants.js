@@ -11,5 +11,5 @@ export const SCORE_LINK = 0.5  // score per message link
 export const SCORE_CHARACTER = 0.01 // score per message character
 export const SCORE_STICKER = 1.5 // score per sticker
 
-export const BASE_COOLDOWN_TIME = 5
+export const BASE_COOLDOWN_MINUTES = 5
 export const WARN_EXPIRE = 1 * WEEKS

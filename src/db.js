@@ -19,18 +19,17 @@ const getUserWarnings = (id) => {
   else return user.warnings
 }
 
-import { BASE_COOLDOWN_TIME } from './constants'
+import { BASE_COOLDOWN_MINUTES } from './constants'
 import { MINUTES, HOURS } from './time'
 
 // alias to add a warning to a user
 export const addWarning = (id) => {
     let warnings = getUserWarnings(id)
-    let cooldownTime = Math.pow(BASE_COOLDOWN_TIME, warnings) * MINUTES
+    let cooldownTime = Math.pow(BASE_COOLDOWN_MINUTES, warnings) * MINUTES
+
     // increment user warnings
     db.get('users').find({ id }).assign({ warnings: warnings + 1 }).value()
-    // set the warning updated time
-    db.get('users').find({ id }).assign({ warnUpdated: Date.now() }).value()
-    // ban the user for a set time
+    updateWarnTime(id)
     banUser(id, cooldownTime)
 
     return cooldownTime
@@ -41,9 +40,12 @@ export const rmWarning = (id) => {
     let warnings = getUserWarnings(id)
     if (warnings > 0) {
         db.get('users').find({ id }).assign({ warnings: warnings - 1 }).value()
-        // set the warning updated time
-        db.get('users').find({ id }).assign({ warnUpdated: Date.now() }).value()
+        updateWarnTime(id)
     }
+}
+
+export const updateWarnTime = (id) => {
+    db.get('users').find({ id }).assign({ warnUpdated: Date.now() }).value()
 }
 
 export const setLeft = (id, value) => {

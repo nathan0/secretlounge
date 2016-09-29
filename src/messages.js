@@ -9,6 +9,10 @@ export const USER_LEFT_CHAT = 'left the chat'
 export const USER_JOINED_CHAT = 'joined the chat'
 export const USER_SPAMMING = 'your recent messages have been deemed spammy, if this is a false positive contact @omnidan or @hdrive'
 export const ALREADY_WARNED = 'a warning has already been issued for this message'
+export const MESSAGE_DISAPPEARED = 'this message disappeared into the ether'
+
+export const handedCooldown = (duration, deleted = false) =>
+  `you've been handed a cooldown of ${duration} for this message ${deleted ? '(message also deleted)' : ''}`
 
 const parseValue = (val) => {
   if (typeof val === 'boolean') return val ? 'on' : 'off'
@@ -69,8 +73,10 @@ export const getUsernameFromEvent = (evt) => {
 export const stringifyTimestamp = (ts) =>
   (new Date(ts)).toUTCString()
 
-export const usersText = (users) =>
-  `<b>${users.filter(u => !u.left).length}</b> <i>users:</i> ` + users.filter(u => !u.left).map(getUsername).join(', ')
+export const usersText = (users) => {
+  let u = users.filter(isActive)
+  `<b>${u.length}</b> <i>users:</i> ` + u.map(getUsername).join(', ')
+}
 
 export const infoText = (user) => !user ? '<i>user not found</i>' :
   `<b>id:</b> ${obfuscateId(user.id)}, <b>username:</b> @${user.username}, ` +

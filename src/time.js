@@ -15,6 +15,6 @@ export const formatTime = (ms) => {
         return Math.ceil(ms / DAYS) + 'd'
     } else {
         // let's really hope this never happens, eh?
-        return Math.ceil(ms / HOURS) + 'w'
+        return Math.ceil(ms / WEEKS) + 'w'
     }
 }
