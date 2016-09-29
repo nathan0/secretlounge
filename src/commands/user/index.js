@@ -5,7 +5,7 @@ import {
   infoText, configSet, usersText,
   USER_NOT_IN_CHAT, USER_LEFT_CHAT
 } from '../../messages'
-import { kickUser, getUsers, getSystemConfig, setDebugMode } from '../../db'
+import { setLeft, getUsers, getSystemConfig, setDebugMode } from '../../db'
 import { version } from '../../../package.json'
 
 export default function userCommands (user, evt, reply) {
@@ -19,8 +19,7 @@ export default function userCommands (user, evt, reply) {
 <i>or reply to a message and use:</i>
   /info - to get info about the user that sent this message
   /warn - to warn the user that sent this message
-  /kick - to kick the user that sent this message
-  /ban - to ban the user that sent this message`))
+  /delete - delete a message and warn the user`))
       break
 
     case 'adminhelp':
@@ -34,11 +33,11 @@ export default function userCommands (user, evt, reply) {
       break
 
     case 'stop':
-      if (!user || user.kicked) return reply(cursive(USER_NOT_IN_CHAT))
-      kickUser(evt.user)
+      if (!user || user.left) return reply(cursive(USER_NOT_IN_CHAT))
       sendToAll(htmlMessage(
         `${getUsername(user)} <i>${USER_LEFT_CHAT}</i>`
       ))
+      setLeft(user.id, true)
       break
 
     case 'users':

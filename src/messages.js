@@ -1,12 +1,18 @@
+import { WARN_EXPIRE } from './constants'
 import { getRank } from './ranks'
-import { DAYS } from './time'
+import { DAYS, formatTime } from './time'
 
 export const USER_NOT_IN_CHAT = 'you\'re not in the chat yet! Use </i>/start<i> to join'
 export const USER_IN_CHAT = 'you\'re already in the chat!'
-export const USER_BANNED_FROM_CHAT = 'you\'re banned from this chat'
+export const USER_BANNED_FROM_CHAT = 'your cooldown expires at'
 export const USER_LEFT_CHAT = 'left the chat'
 export const USER_JOINED_CHAT = 'joined the chat'
 export const USER_SPAMMING = 'your recent messages have been deemed spammy, if this is a false positive contact @omnidan or @hdrive'
+export const ALREADY_WARNED = 'a warning has already been issued for this message'
+export const MESSAGE_DISAPPEARED = 'this message disappeared into the ether'
+
+export const handedCooldown = (duration, deleted = false) =>
+  `you've been handed a cooldown of ${formatTime(duration)} for this message ${deleted ? '(message also deleted)' : ''}`
 
 const parseValue = (val) => {
   if (typeof val === 'boolean') return val ? 'on' : 'off'
@@ -67,17 +73,18 @@ export const getUsernameFromEvent = (evt) => {
 export const stringifyTimestamp = (ts) =>
   (new Date(ts)).toUTCString()
 
-export const usersText = (users) =>
-  `<b>${users.length}</b> <i>users:</i> ` + users.map(getUsername).join(', ')
+export const usersText = (users) => {
+  let u = users.filter(isActive)
+  `<b>${u.length}</b> <i>users:</i> ` + u.map(getUsername).join(', ')
+}
 
 export const infoText = (user) => !user ? '<i>user not found</i>' :
   `<b>id:</b> ${obfuscateId(user.id)}, <b>username:</b> @${user.username}, ` +
   `<b>rank:</b> ${user.rank} (${getRank(user.rank)}), ` +
-  `<b>warnings:</b> ${user.warnings || 0} ${generateSmiley(user.warnings)}, ` +
-  `<b>kicked:</b> ${user.kicked ? 'yes' : 'no'}, <b>banned:</b> ${user.banned ? stringifyTimestamp(user.banned) : 'no'}`
+  `<b>warnings:</b> ${user.warnings || 0} ${generateSmiley(user.warnings)}${ user.warnings > 0 ? ` (one warning will be removed on ${stringifyTimestamp(user.warnUpdated + WARN_EXPIRE)})` : ''}, ` +
+  `<b>cooldown:</b> ${user.banned >= Date.now() ? 'yes, until ' + stringifyTimestamp(user.banned) : 'no'}`
 
 export const modInfoText = (user) => !user ? '<i>user not found</i>' :
-  `<b>id:</b> ${obfuscateId(user.id)}, <b>username:</b> anon, ` +
-  `<b>rank:</b> ???, ` +
-  `<b>warnings:</b> ${user.warnings || 0} ${generateSmiley(user.warnings)}, ` +
-  `<b>kicked:</b> ${user.kicked ? 'yes' : 'no'}, <b>banned:</b> ${user.banned ? stringifyTimestamp(user.banned) : 'no'}`
+  `<b>id:</b> ${obfuscateId(user.id)}, <b>username:</b> anonymous, ` +
+  `<b>rank:</b> n/a, ` +
+  `<b>cooldown:</b> ${user.banned >= Date.now() ? 'yes, until ' + stringifyTimestamp(user.banned) : 'no'}`

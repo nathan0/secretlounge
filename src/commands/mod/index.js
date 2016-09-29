@@ -6,12 +6,14 @@ import {
   cursive, htmlMessage,
   modInfoText, getUsername
 } from '../../messages'
-import { getFromCache, getCacheGroup } from '../../cache'
+import { getFromCache, getCacheGroup, setWarnedFlag, hasWarnedFlag } from '../../cache'
 import {
   getUserByUsername, getUser, getUsers,
-  warnUser, kickUser, banUser
+  addWarning
 } from '../../db'
+import { handedCooldown, ALREADY_WARNED, MESSAGE_DISAPPEARED } from '../../messages'
 import { RANKS } from '../../ranks'
+import { formatTime } from '../../time'
 
 const getReason = (evt) =>
   evt.args.length > 0
@@ -21,7 +23,8 @@ const getReason = (evt) =>
 const ERR_NO_REPLY = 'please reply to a message to use this command'
 
 export default function modCommands (user, evt, reply) {
-  let messageRepliedTo
+  const messageRepliedTo = getFromCache(evt, reply)
+  const msgId = evt && evt.raw && evt.raw.reply_to_message && evt.raw.reply_to_message.message_id
 
   switch (evt.cmd) {
     case 'modsay':
@@ -32,7 +35,6 @@ export default function modCommands (user, evt, reply) {
 
     case 'info':
       if (evt && evt.raw && evt.raw.reply_to_message) {
-        messageRepliedTo = getFromCache(evt, reply)
         if (messageRepliedTo) {
           const user = getUser(messageRepliedTo.sender)
           reply(htmlMessage(
@@ -43,117 +45,55 @@ export default function modCommands (user, evt, reply) {
       break
 
     case 'delete':
-      messageRepliedTo = getFromCache(evt, reply)
-      let replyCache = getCacheGroup(evt && evt.raw && evt.raw.reply_to_message && evt.raw.reply_to_message.message_id)
+      let replyCache = getCacheGroup(msgId)
 
       if (messageRepliedTo) {
-        // for everyone who is not a mod or higher, or not the sender, edit the message this is referencing.
-        info('%o deleted message of user %o', user, getUser(messageRepliedTo.sender))
-        getUsers().map((user) => {
-          if (user.rank < RANKS.mod && messageRepliedTo.sender !== user.id) {
-            reply({
-              type: 'editMessageText',
-              chat: user.id,
-              id: replyCache && replyCache[user.id],
-              text: '<i>this message disappeared into the ether</i>',
-              options: {
-                parse_mode: 'HTML'
-              }
-            })
-          }
-        })
-        sendToUser(messageRepliedTo.sender, {
-          ...htmlMessage('<i>this message has now been deleted, only you can see the content of the above message</i>'),
-          options: {
-            reply_to_message_id: evt && evt.raw && evt.raw.reply_to_message && evt.raw.reply_to_message.message_id,
-            parse_mode: 'HTML'
-          }
-        })
-        sendToMods({
-          ...htmlMessage(getUsername(user) + '<i> deleted the above message</i>'),
-          options: {
-            reply_to_message_id: replyCache && replyCache[user.id],
-            parse_mode: 'HTML'
-          }
-        })
+        if (!hasWarnedFlag(msgId)) {
+          const cooldownTime = addWarning(messageRepliedTo.sender)
+          setWarnedFlag(msgId)
+          getUsers().map((user) => {
+            if (messageRepliedTo.sender !== user.id) {
+              reply({
+                ...cursive(MESSAGE_DISAPPEARED),
+                type: 'editMessageText',
+                chat: user.id,
+                id: replyCache && replyCache[user.id],
+                options: {
+                  parse_mode: 'HTML'
+                }
+              })
+            }
+          });
+          sendToUser(messageRepliedTo.sender, {
+            ...cursive(handedCooldown(cooldownTime, true)),
+            options: {
+              reply_to_message_id: msgId,
+              parse_mode: 'HTML'
+            }
+          })
+        } else {
+          reply(cursive(ALREADY_WARNED))
+        }
       } else {
         reply(cursive(ERR_NO_REPLY))
       }
       break
 
     case 'warn':
-      messageRepliedTo = getFromCache(evt, reply)
       if (messageRepliedTo) {
-        const warnResult = warnUser(messageRepliedTo.sender)
-        info('%o warned user %s -> %o', user, messageRepliedTo.sender, warnResult)
-        sendToUser(messageRepliedTo.sender, {
-          ...htmlMessage('<i>you\'ve been warned' + getReason(evt) + ', use</i> /info <i>to check your warnings</i>'),
-          options: {
-            reply_to_message_id: evt.raw.reply_to_message.message_id,
-            parse_mode: 'HTML'
-          }
-        })
-        sendToMods({
-          ...htmlMessage(getUsername(user) + ' <i>warned user' + getReason(evt) + ', has</i> <b>' + warnResult.warnings + '</b> <i>warnings now</i>'),
-          options: {
-            reply_to_message_id: evt.raw.reply_to_message.message_id,
-            parse_mode: 'HTML'
-          }
-        })
-      } else {
-        reply(cursive(ERR_NO_REPLY))
-      }
-      break
-
-    case 'kick':
-      messageRepliedTo = getFromCache(evt, reply)
-      if (messageRepliedTo) {
-        const kickResult = warnUser(messageRepliedTo.sender)
-        kickUser(messageRepliedTo.sender)
-        info('%o kicked user %s -> %o', user, messageRepliedTo.sender, kickResult)
-        sendToUser(messageRepliedTo.sender, {
-          ...htmlMessage('<i>you\'ve been kicked' + getReason(evt) + ', use</i> /start <i>to rejoin</i>'),
-          options: {
-            reply_to_message_id: evt.raw.reply_to_message.message_id,
-            parse_mode: 'HTML'
-          }
-        })
-        sendToMods({
-          ...htmlMessage(getUsername(user) + ' <i>kicked user' + getReason(evt) + ', has</i> <b>' + kickResult.warnings + '</b> <i>warnings now</i>'),
-          options: {
-            reply_to_message_id: evt.raw.reply_to_message.message_id,
-            parse_mode: 'HTML'
-          }
-        })
-      } else {
-        reply(cursive(ERR_NO_REPLY))
-      }
-      break
-
-    case 'ban':
-      messageRepliedTo = getFromCache(evt, reply)
-      if (messageRepliedTo) {
-        const repliedToUser = getUser(messageRepliedTo.sender)
-        // if (repliedToUser.rank >= RANKS.user) return reply(cursive('you can\'t ban mods or admins'))
-
-        const banResult = warnUser(messageRepliedTo.sender)
-        kickUser(messageRepliedTo.sender)
-        banUser(messageRepliedTo.sender)
-        info('%o banned user %s -> %o', user, messageRepliedTo.sender, banResult)
-        sendToUser(messageRepliedTo.sender, {
-          ...htmlMessage('<i>you\'ve been banned' + getReason(evt) + '</i>'),
-          options: {
-            reply_to_message_id: evt.raw.reply_to_message.message_id,
-            parse_mode: 'HTML'
-          }
-        })
-        sendToMods({
-          ...htmlMessage(getUsername(user) + ' <i>banned user' + getReason(evt) + ', has</i> <b>' + banResult.warnings + '</b> <i>warnings now</i>'),
-          options: {
-            reply_to_message_id: evt.raw.reply_to_message.message_id,
-            parse_mode: 'HTML'
-          }
-        })
+        if (!hasWarnedFlag(msgId)) {
+          const cooldownTime = addWarning(messageRepliedTo.sender)
+          setWarnedFlag(msgId)
+          sendToUser(messageRepliedTo.sender, {
+            ...cursive(handedCooldown(cooldownTime)),
+            options: {
+              reply_to_message_id: msgId,
+              parse_mode: 'HTML'
+            }
+          })
+        } else {
+          reply(cursive(ALREADY_WARNED))
+        }
       } else {
         reply(cursive(ERR_NO_REPLY))
       }

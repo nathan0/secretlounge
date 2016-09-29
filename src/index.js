@@ -20,7 +20,7 @@ import { RANKS } from './ranks'
 import { setCache, delCache, createCacheGroup, getCacheGroup } from './cache'
 import {
   getUser, getUsers, setRank, isActive, addUser, rejoinUser, updateUser, delUser,
-  getSystemConfig
+  getSystemConfig, rmWarning
 } from './db'
 import commands from './commands'
 import { HOURS } from './time'
@@ -32,8 +32,18 @@ import {
   SCORE_MESSAGE,
   SCORE_LINK,
   SCORE_STICKER,
-  SCORE_CHARACTER
+  SCORE_CHARACTER,
+  WARN_EXPIRE
 } from './constants'
+
+// run a check to see if any warnings need removed every half hour
+setInterval(() => {
+  getUsers().map((user) => {
+    if (user.warnUpdated + WARN_EXPIRE <= Date.now()) {
+      rmWarning(user.id)
+    }
+  })
+}, 0.5 * HOURS)
 
 const parseEvent = (rawEvent) => {
   if (typeof rawEvent === 'string') return { type: 'message', text: rawEvent }
@@ -122,16 +132,16 @@ const relay = (type) => {
   networks.on(type, (evt, reply) => {
     if (type !== 'message' || (evt && evt.text && evt.text.charAt(0) !== '/')) { // don't parse commands again
       const user = getUser(evt.user)
-      if (user) {
-        if ((user.spamScore + calcSpamScore(evt)) > SPAM_LIMIT) return reply(cursive(USER_SPAMMING))
-        else increaseSpamScore(user, evt)
+      if (!isActive(user)) { // make sure user is in the group chat
+        return reply(cursive(USER_NOT_IN_CHAT))
+      } else if (user && user.banned >= Date.now()) {
+        return reply(cursive(USER_BANNED_FROM_CHAT + ' ' + stringifyTimestamp(user.banned)))
       }
-      if (user && isActive(user)) { // make sure user is in the group chat
-        // otherwise, relay event to all users
-        sendToAll(evt)
-      } else {
-        reply(cursive(USER_NOT_IN_CHAT))
-      }
+
+      if ((user.spamScore + calcSpamScore(evt)) > SPAM_LIMIT) return reply(cursive(USER_SPAMMING))
+      else increaseSpamScore(user, evt)
+
+      sendToAll(evt);
     }
   })
 }
@@ -158,14 +168,14 @@ const calcSpamScore = (evt) => {
       if (LINK_REGEX.test(evt.text)) {
         return SCORE_MESSAGE + // regular message
           (evt.text.length * SCORE_CHARACTER) + // characters count, still
-          ((evt.text.match(LINK_REGEX) || []).length * SCORE_LINK); // number of links * score
+          ((evt.text.match(LINK_REGEX) || []).length * SCORE_LINK) // number of links * score
       }
 
       return SCORE_MESSAGE + (evt.text.length * SCORE_CHARACTER) // regular message + character count
     default:
       return SCORE_MESSAGE
   }
-};
+}
 
 const increaseSpamScore = (user, evt) => {
   const incSpamScore = calcSpamScore(evt)
@@ -210,13 +220,11 @@ networks.on('command', (evt, reply) => {
   const user = getUser(evt.user)
   if (evt && evt.cmd) evt.cmd = evt.cmd.toLowerCase()
 
-  if (evt && evt.cmd === 'start') { // user (re)joining chat
-    if (user && isActive(user)) return reply(cursive(USER_IN_CHAT))
-    else if (user && user.banned >= Date.now()) {
-      return reply(cursive(USER_BANNED_FROM_CHAT + ' until ' + stringifyTimestamp(user.banned)))
-    }
-    else if (user && (user.kicked || user.banned)) rejoinUser(evt.user)
-    else addUser(evt.user)
+  if (evt && evt.cmd === 'start') {
+    if (isActive(user)) return reply(cursive(USER_IN_CHAT))
+    else if (!user) addUser(evt.user)
+    else rejoinUser(evt.user)
+
     const newUser = updateUserFromEvent(evt)
 
     sendToAll(htmlMessage(
