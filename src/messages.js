@@ -1,6 +1,6 @@
 import { WARN_EXPIRE } from './constants'
 import { getRank } from './ranks'
-import { DAYS } from './time'
+import { DAYS, formatTime } from './time'
 
 export const USER_NOT_IN_CHAT = 'you\'re not in the chat yet! Use </i>/start<i> to join'
 export const USER_IN_CHAT = 'you\'re already in the chat!'
@@ -12,7 +12,7 @@ export const ALREADY_WARNED = 'a warning has already been issued for this messag
 export const MESSAGE_DISAPPEARED = 'this message disappeared into the ether'
 
 export const handedCooldown = (duration, deleted = false) =>
-  `you've been handed a cooldown of ${duration} for this message ${deleted ? '(message also deleted)' : ''}`
+  `you've been handed a cooldown of ${formatTime(duration)} for this message ${deleted ? '(message also deleted)' : ''}`
 
 const parseValue = (val) => {
   if (typeof val === 'boolean') return val ? 'on' : 'off'

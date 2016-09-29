@@ -44,9 +44,8 @@ export const rmWarning = (id) => {
     }
 }
 
-export const updateWarnTime = (id) => {
+export const updateWarnTime = (id) =>
     db.get('users').find({ id }).assign({ warnUpdated: Date.now() }).value()
-}
 
 export const setLeft = (id, value) => {
     db.get('users').find({ id }).assign({ left: value }).value()

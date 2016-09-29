@@ -23,7 +23,7 @@ const getReason = (evt) =>
 const ERR_NO_REPLY = 'please reply to a message to use this command'
 
 export default function modCommands (user, evt, reply) {
-  let messageRepliedTo
+  const messageRepliedTo = getFromCache(evt, reply)
   const msgId = evt && evt.raw && evt.raw.reply_to_message && evt.raw.reply_to_message.message_id
 
   switch (evt.cmd) {
@@ -35,7 +35,6 @@ export default function modCommands (user, evt, reply) {
 
     case 'info':
       if (evt && evt.raw && evt.raw.reply_to_message) {
-        messageRepliedTo = getFromCache(evt, reply)
         if (messageRepliedTo) {
           const user = getUser(messageRepliedTo.sender)
           reply(htmlMessage(
@@ -46,7 +45,6 @@ export default function modCommands (user, evt, reply) {
       break
 
     case 'delete':
-      messageRepliedTo = getFromCache(evt, reply)
       let replyCache = getCacheGroup(msgId)
 
       if (messageRepliedTo) {
@@ -67,9 +65,9 @@ export default function modCommands (user, evt, reply) {
             }
           });
           sendToUser(messageRepliedTo.sender, {
-            ...cursive(handedCooldown(formatTime(cooldownTime), true)),
+            ...cursive(handedCooldown(cooldownTime, true)),
             options: {
-              reply_to_message_id: evt && evt.raw && evt.raw.reply_to_message && evt.raw.reply_to_message.message_id,
+              reply_to_message_id: msgId,
               parse_mode: 'HTML'
             }
           })
@@ -82,16 +80,14 @@ export default function modCommands (user, evt, reply) {
       break
 
     case 'warn':
-      messageRepliedTo = getFromCache(evt, reply)
-
       if (messageRepliedTo) {
         if (!hasWarnedFlag(msgId)) {
           const cooldownTime = addWarning(messageRepliedTo.sender)
           setWarnedFlag(msgId)
           sendToUser(messageRepliedTo.sender, {
-            ...cursive(handedCooldown(formatTime(cooldownTime))),
+            ...cursive(handedCooldown(cooldownTime)),
             options: {
-              reply_to_message_id: evt && evt.raw && evt.raw.reply_to_message && evt.raw.reply_to_message.message_id,
+              reply_to_message_id: msgId,
               parse_mode: 'HTML'
             }
           })
