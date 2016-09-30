@@ -1,4 +1,5 @@
 import { WARN_EXPIRE } from './constants'
+import { isActive } from './db'
 import { getRank } from './ranks'
 import { DAYS, formatTime } from './time'
 
@@ -75,7 +76,7 @@ export const stringifyTimestamp = (ts) =>
 
 export const usersText = (users) => {
   let u = users.filter(isActive)
-  `<b>${u.length}</b> <i>users:</i> ` + u.map(getUsername).join(', ')
+  return `<b>${u.length}</b> <i>users:</i> ` + u.map(getUsername).join(', ')
 }
 
 export const infoText = (user) => !user ? '<i>user not found</i>' :

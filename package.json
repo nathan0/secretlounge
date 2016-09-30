@@ -46,10 +46,13 @@
     "babel-register": "^6.5.2",
     "babel-watch": "^2.0.2",
     "cross-env": "^1.0.7",
+    "eslint-config-standard": "6.2.0",
+    "eslint-plugin-promise": "2.0.1",
+    "eslint-plugin-standard": "2.0.1",
     "rimraf": "^2.5.2"
   },
   "dependencies": {
-    "coffea": "^1.0.0-beta16",
+    "coffea": "1.0.0-beta18",
     "coffea-telegram": "^1.0.0-beta8",
     "debug-dude": "^1.0.3",
     "lowdb": "^0.13.1"
