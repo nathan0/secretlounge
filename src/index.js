@@ -1,5 +1,5 @@
 import dude from 'debug-dude'
-const { /*debug,*/ log, info, warn /*, error*/ } = dude('bot')
+const { /* debug, */ log, info, warn /* , error */ } = dude('bot')
 
 import { version } from '../package.json'
 info(`secretlounge v${version} starting`)
@@ -14,13 +14,17 @@ import {
   getUsername, getUsernameFromEvent, getRealnameFromEvent,
   stringifyTimestamp,
   USER_NOT_IN_CHAT, USER_IN_CHAT, USER_BANNED_FROM_CHAT, USER_JOINED_CHAT,
-  USER_SPAMMING
+  USER_SPAMMING, ERR_NO_REPLY, ALREADY_UPVOTED, CANT_UPVOTE_OWN_MESSAGE,
+  KARMA_THANK_YOU, YOU_HAVE_KARMA
 } from './messages'
 import { RANKS } from './ranks'
-import { setCache, delCache, createCacheGroup, getCacheGroup } from './cache'
+import {
+  setCache, delCache, createCacheGroup, getCacheGroup, getFromCache,
+  addUpvote, hasUpvoted
+} from './cache'
 import {
   getUser, getUsers, setRank, isActive, addUser, rejoinUser, updateUser, delUser,
-  getSystemConfig, rmWarning
+  getSystemConfig, rmWarning, addKarma, karmaOptedOut
 } from './db'
 import commands from './commands'
 import { HOURS } from './time'
@@ -33,7 +37,8 @@ import {
   SCORE_LINK,
   SCORE_STICKER,
   SCORE_CHARACTER,
-  WARN_EXPIRE
+  WARN_EXPIRE,
+  KARMA_PLUS_ONE
 } from './constants'
 
 // run a check to see if any warnings need removed every half hour
@@ -87,9 +92,9 @@ export const sendTo = (users, rawEvent, alwaysSend = false) => {
           })
           .catch((err) => {
             if (err && (
-              err.message === '403 {"ok":false,"error_code":403,"description":"Bot was blocked by the user"}'
-              || err.message === '403 {"ok":false,"error_code":403,"description":"Forbidden: user is deactivated"}'
-              || err.message === '400 {"ok":false,"error_code":400,"description":"PEER_ID_INVALID"}'
+              err.message === '403 {"ok":false,"error_code":403,"description":"Bot was blocked by the user"}' ||
+              err.message === '403 {"ok":false,"error_code":403,"description":"Forbidden: user is deactivated"}' ||
+              err.message === '400 {"ok":false,"error_code":400,"description":"PEER_ID_INVALID"}'
             )) {
               info('user (%o) blocked the bot (or user is deactivated), removing from the chat', user)
               delUser(user.id)
@@ -131,6 +136,10 @@ export const sendToAdmins = (rawEvent) =>
 const relay = (type) => {
   networks.on(type, (evt, reply) => {
     if (type !== 'message' || (evt && evt.text && evt.text.charAt(0) !== '/')) { // don't parse commands again
+      if ((evt && evt.text === '+1') && (evt && evt.raw && evt.raw.reply_to_message)) {
+        return handleKarma(evt, reply)
+      }
+
       const user = getUser(evt.user)
       if (!isActive(user)) { // make sure user is in the group chat
         return reply(cursive(USER_NOT_IN_CHAT))
@@ -141,7 +150,7 @@ const relay = (type) => {
       if ((user.spamScore + calcSpamScore(evt)) > SPAM_LIMIT) return reply(cursive(USER_SPAMMING))
       else increaseSpamScore(user, evt)
 
-      sendToAll(evt);
+      sendToAll(evt)
     }
   })
 }
@@ -214,6 +223,31 @@ const showChangelog = (evt, reply) => {
   }
 }
 
+const handleKarma = (evt, reply) => {
+  const user = getUser(evt && evt.user)
+  const replyId = evt && evt.raw && evt.raw.reply_to_message && evt.raw.reply_to_message.message_id
+  const { sender: receiver } = getFromCache(evt, reply)
+
+  if (replyId) {
+    if (receiver !== user.id) {
+      if (!hasUpvoted(replyId, user.id)) {
+        addKarma(receiver, KARMA_PLUS_ONE)
+        addUpvote(replyId, user.id)
+        if (!karmaOptedOut(receiver)) {
+          sendToUser(receiver, cursive(YOU_HAVE_KARMA))
+        }
+        reply(cursive(KARMA_THANK_YOU))
+      } else {
+        reply(cursive(ALREADY_UPVOTED))
+      }
+    } else {
+      reply(cursive(CANT_UPVOTE_OWN_MESSAGE))
+    }
+  } else {
+    reply(cursive(ERR_NO_REPLY))
+  }
+}
+
 networks.on('command', (evt, reply) => {
   log('received command event: %o', evt)
 
@@ -236,6 +270,8 @@ networks.on('command', (evt, reply) => {
 
     const motd = getSystemConfig().motd
     if (motd) reply(cursive(motd))
+  } else if (evt && evt.cmd === '+1') {
+    handleKarma(evt, reply)
   } else {
     if (!user) return reply(cursive(USER_NOT_IN_CHAT))
 

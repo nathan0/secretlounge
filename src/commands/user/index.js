@@ -1,14 +1,17 @@
+import { getCacheGroup, getFromCache } from '../../cache'
 import { sendToAll } from '../../index'
 import {
   cursive, htmlMessage,
   getUsername,
   infoText, configSet, usersText,
-  USER_NOT_IN_CHAT, USER_LEFT_CHAT
+  USER_NOT_IN_CHAT, USER_LEFT_CHAT, ERR_NO_REPLY
 } from '../../messages'
-import { setLeft, getUsers, getSystemConfig, setDebugMode } from '../../db'
+import { setLeft, getUsers, getSystemConfig, setDebugMode, setKarmaMode } from '../../db'
 import { version } from '../../../package.json'
 
 export default function userCommands (user, evt, reply) {
+  const isReply = evt && evt.raw && evt.raw.reply_to_message
+
   switch (evt.cmd) {
     case 'modhelp':
       reply(htmlMessage(`
@@ -48,7 +51,6 @@ export default function userCommands (user, evt, reply) {
       break
 
     case 'info':
-      const isReply = evt && evt.raw && evt.raw.reply_to_message
       if (!isReply && evt.args.length === 0) {
         reply(htmlMessage(
           infoText(user)
@@ -68,10 +70,16 @@ export default function userCommands (user, evt, reply) {
       reply(cursive('this command has been disabled'))
       break
 
-    case 'debug':
+    case 'toggledebug':
       const newDebugMode = !user.debug
       setDebugMode(evt.user, newDebugMode)
       reply(configSet('debug mode', newDebugMode))
+      break
+
+    case 'togglekarma':
+      const newKarmaMode = !user.hideKarma
+      setKarmaMode(evt.user, newKarmaMode)
+      reply(configSet('karma notifications', !newKarmaMode))	
       break
 
     case 'source':

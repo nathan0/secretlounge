@@ -2,6 +2,7 @@ import dude from 'debug-dude'
 const { /*debug, log,*/ info /*, warn, error*/ } = dude('bot:commands:mod')
 
 import { sendToAll, sendToUser, sendToMods } from '../../index'
+import { KARMA_PENALTY_WARN } from '../../constants'
 import {
   cursive, htmlMessage,
   modInfoText, getUsername
@@ -9,9 +10,9 @@ import {
 import { getFromCache, getCacheGroup, setWarnedFlag, hasWarnedFlag } from '../../cache'
 import {
   getUserByUsername, getUser, getUsers,
-  addWarning
+  addWarning, rmKarma
 } from '../../db'
-import { handedCooldown, ALREADY_WARNED, MESSAGE_DISAPPEARED } from '../../messages'
+import { handedCooldown, ALREADY_WARNED, MESSAGE_DISAPPEARED, ERR_NO_REPLY } from '../../messages'
 import { RANKS } from '../../ranks'
 import { formatTime } from '../../time'
 
@@ -19,8 +20,6 @@ const getReason = (evt) =>
   evt.args.length > 0
   ? ' (' + evt.args.join(' ') + ')'
   : ''
-
-const ERR_NO_REPLY = 'please reply to a message to use this command'
 
 export default function modCommands (user, evt, reply) {
   const messageRepliedTo = getFromCache(evt, reply)
@@ -50,6 +49,7 @@ export default function modCommands (user, evt, reply) {
       if (messageRepliedTo) {
         if (!hasWarnedFlag(msgId)) {
           const cooldownTime = addWarning(messageRepliedTo.sender)
+          rmKarma(messageRepliedTo.sender, KARMA_PENALTY_WARN)
           setWarnedFlag(msgId)
           getUsers().map((user) => {
             if (messageRepliedTo.sender !== user.id) {
@@ -83,6 +83,7 @@ export default function modCommands (user, evt, reply) {
       if (messageRepliedTo) {
         if (!hasWarnedFlag(msgId)) {
           const cooldownTime = addWarning(messageRepliedTo.sender)
+          rmKarma(messageRepliedTo.sender, KARMA_PENALTY_WARN)
           setWarnedFlag(msgId)
           sendToUser(messageRepliedTo.sender, {
             ...cursive(handedCooldown(cooldownTime)),

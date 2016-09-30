@@ -5,6 +5,14 @@ import { version } from '../package.json'
 
 db.defaults({ users: [], system: {} }).value()
 
+export const getKarma = (id) => {
+  const user = getUser(id)
+  if (!user || !user.karma) return 0
+  else return user.karma
+}
+export const addKarma = (id, val = 1) => db.get('users').find({ id }).assign({ karma: getKarma(id) + val }).value()
+export const rmKarma = (id, val = 1) => db.get('users').find({ id }).assign({ karma: getKarma(id) - val }).value()
+
 export const getUser = (id) => db.get('users').find({ id }).value()
 export const getUserByUsername = (username) => db.get('users').find({ username }).value()
 export const addUser = (id) => db.get('users').push({ id, rank: 0, version, left: false }).value()
@@ -19,7 +27,7 @@ const getUserWarnings = (id) => {
   else return user.warnings
 }
 
-import { BASE_COOLDOWN_MINUTES } from './constants'
+import { BASE_COOLDOWN_MINUTES, WARN_KARMA_PENALTY } from './constants'
 import { MINUTES, HOURS } from './time'
 
 // alias to add a warning to a user
@@ -61,6 +69,8 @@ export const isActive = (user) => user && !user.left
 
 export const setRank = (id, rank) => db.get('users').find({ id }).assign({ rank }).value()
 export const setDebugMode = (id, val) => db.get('users').find({ id }).assign({ debug: val }).value()
+export const setKarmaMode = (id, val) => db.get('users').find({ id }).assign({ hideKarma: val }).value()
+export const karmaOptedOut = (id) => getUser(id).hideKarma || false
 
 export const getSystemConfig = () => db.get('system').value()
 export const setMotd = (motd) => db.get('system').assign({ motd }).value()

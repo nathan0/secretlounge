@@ -13,3 +13,6 @@ export const SCORE_STICKER = 1.5 // score per sticker
 
 export const BASE_COOLDOWN_MINUTES = 5
 export const WARN_EXPIRE = 1 * WEEKS
+
+export const KARMA_PLUS_ONE = 1
+export const KARMA_PENALTY_WARN = 10

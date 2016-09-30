@@ -3,6 +3,7 @@ import { isActive } from './db'
 import { getRank } from './ranks'
 import { DAYS, formatTime } from './time'
 
+export const ERR_NO_REPLY = 'please reply to a message to use this command'
 export const USER_NOT_IN_CHAT = 'you\'re not in the chat yet! Use </i>/start<i> to join'
 export const USER_IN_CHAT = 'you\'re already in the chat!'
 export const USER_BANNED_FROM_CHAT = 'your cooldown expires at'
@@ -14,6 +15,11 @@ export const MESSAGE_DISAPPEARED = 'this message disappeared into the ether'
 
 export const handedCooldown = (duration, deleted = false) =>
   `you've been handed a cooldown of ${formatTime(duration)} for this message ${deleted ? '(message also deleted)' : ''}`
+
+export const KARMA_THANK_YOU = 'you just gave this user some sweet karma, awesome!'
+export const ALREADY_UPVOTED = 'you already upvoted this message'
+export const CANT_UPVOTE_OWN_MESSAGE = 'you can\'t upvote your own message'
+export const YOU_HAVE_KARMA = 'you\'ve just been given sweet karma! (check /info to see your karma, or /toggleKarma to turn these notifications off)'
 
 const parseValue = (val) => {
   if (typeof val === 'boolean') return val ? 'on' : 'off'
@@ -73,6 +79,11 @@ export const getUsernameFromEvent = (evt) => {
 
 export const stringifyTimestamp = (ts) =>
   (new Date(ts)).toUTCString()
+  
+export const obfuscateKarma = (karma) => {
+  let offset = Math.round((karma * 0.2) + 2)
+  return karma + Math.floor(Math.random() * (offset + 1) - offset)
+}
 
 export const usersText = (users) => {
   let u = users.filter(isActive)
@@ -82,10 +93,12 @@ export const usersText = (users) => {
 export const infoText = (user) => !user ? '<i>user not found</i>' :
   `<b>id:</b> ${obfuscateId(user.id)}, <b>username:</b> @${user.username}, ` +
   `<b>rank:</b> ${user.rank} (${getRank(user.rank)}), ` +
+  `<b>karma:</b> ${user.karma || 0}, ` +
   `<b>warnings:</b> ${user.warnings || 0} ${generateSmiley(user.warnings)}${ user.warnings > 0 ? ` (one warning will be removed on ${stringifyTimestamp(user.warnUpdated + WARN_EXPIRE)})` : ''}, ` +
   `<b>cooldown:</b> ${user.banned >= Date.now() ? 'yes, until ' + stringifyTimestamp(user.banned) : 'no'}`
 
 export const modInfoText = (user) => !user ? '<i>user not found</i>' :
   `<b>id:</b> ${obfuscateId(user.id)}, <b>username:</b> anonymous, ` +
   `<b>rank:</b> n/a, ` +
+  `<b>karma:</b> ${obfuscateKarma(user.karma || 0)}, ` +
   `<b>cooldown:</b> ${user.banned >= Date.now() ? 'yes, until ' + stringifyTimestamp(user.banned) : 'no'}`

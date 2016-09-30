@@ -30,6 +30,24 @@ export const hasWarnedFlag = (id) => {
   return messageGroups[cacheId].warned ? true : false
 }
 
+export const addUpvote = (msgId, userId) => {
+  let { cacheId } = messageHistory[msgId]
+  if (messageGroups[cacheId].upvote instanceof Array) {
+    messageGroups[cacheId].upvote.push(userId)
+  } else {
+    messageGroups[cacheId].upvote = [userId]
+  }
+}
+
+export const hasUpvoted = (msgId, userId) => {
+  let { cacheId } = messageHistory[msgId]
+  if (messageGroups[cacheId].upvote instanceof Array) {
+    return messageGroups[cacheId].upvote.indexOf(userId) > -1
+  } else {
+    return false
+  }
+}
+
 export const setCache = (id, cacheId, sender, receiver) => {
   // add to history
   messageHistory[id] = { sender, cacheId }
