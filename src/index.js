@@ -55,6 +55,9 @@ const parseEvent = (rawEvent) => {
   else return rawEvent
 }
 
+const isForwarded = (evt) =>
+    evt && evt.raw && (evt.raw.forward_from || evt.raw.forward_from_chat)
+
 export const sendTo = (users, rawEvent, alwaysSend = false) => {
   const evt = parseEvent(rawEvent)
   const cacheId = createCacheGroup()
@@ -67,20 +70,30 @@ export const sendTo = (users, rawEvent, alwaysSend = false) => {
   }
 
   users.map((user) => {
+    let promises
     if (isActive(user)) {
       if (evt && evt.raw && evt.raw.message_id && user.id === evt.user) {
         setCache(evt.raw.message_id, cacheId, evt.user, user.id)
       }
       if (alwaysSend || user.debug || user.id !== evt.user) { // don't relay back to sender
-        const promises = networks.send({
-          ...evt,
-          chat: user.id,
-          options: {
-            ...evt.options,
-            reply_to_message_id: replyCache && replyCache[user.id],
-            caption: evt.raw && evt.raw.caption
-          }
-        })
+        if (isForwarded(evt)) {
+          promises = networks.send({
+            type: 'forwardMessage',
+            chat: user.id,
+            fromChatId: evt.chat,
+            messageId: evt && evt.raw && evt.raw.message_id
+          })
+        } else {
+          promises = networks.send({
+            ...evt,
+            chat: user.id,
+            options: {
+              ...evt.options,
+              reply_to_message_id: replyCache && replyCache[user.id],
+              caption: evt.raw && evt.raw.caption
+            }
+          })
+        }
         if (evt.user) {
           // store message in history
           promises && promises[0] && promises[0].then((msg) => {
