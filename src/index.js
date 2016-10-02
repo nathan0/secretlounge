@@ -247,7 +247,13 @@ const handleKarma = (evt, reply) => {
         addKarma(receiver, KARMA_PLUS_ONE)
         addUpvote(replyId, user.id)
         if (!karmaOptedOut(receiver)) {
-          sendToUser(receiver, cursive(YOU_HAVE_KARMA))
+          sendToUser(receiver, {
+            ...cursive(YOU_HAVE_KARMA),
+            options: {
+              reply_to_message_id: replyId,
+              parse_mode: 'HTML'
+            }
+          })
         }
         reply(cursive(KARMA_THANK_YOU))
       } else {
