@@ -1,11 +1,8 @@
 import dude from 'debug-dude'
-const { /*debug, log,*/ info /*, warn, error*/ } = dude('bot:commands:admin')
+const { info } = dude('bot:commands:admin')
 
 import { sendToAll, sendToUser } from '../../index'
-import {
-  cursive, htmlMessage,
-  configSet
-} from '../../messages'
+import { htmlMessage, configSet } from '../../messages'
 import { setMotd, setRank, getUserByUsername } from '../../db'
 import { RANKS } from '../../ranks'
 

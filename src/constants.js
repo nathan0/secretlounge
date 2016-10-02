@@ -1,4 +1,4 @@
-import { SECONDS, MINUTES, WEEKS } from './time'
+import { SECONDS, WEEKS } from './time'
 
 export const LINK_REGEX = /(https?:\/\/)?[A-Za-z0-9-_]\.[A-Za-z]/g
 

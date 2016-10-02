@@ -27,36 +27,36 @@ const getUserWarnings = (id) => {
   else return user.warnings
 }
 
-import { BASE_COOLDOWN_MINUTES, WARN_KARMA_PENALTY } from './constants'
-import { MINUTES, HOURS } from './time'
+import { BASE_COOLDOWN_MINUTES } from './constants'
+import { MINUTES } from './time'
 
 // alias to add a warning to a user
 export const addWarning = (id) => {
-    let warnings = getUserWarnings(id)
-    let cooldownTime = Math.pow(BASE_COOLDOWN_MINUTES, warnings) * MINUTES
+  let warnings = getUserWarnings(id)
+  let cooldownTime = Math.pow(BASE_COOLDOWN_MINUTES, warnings) * MINUTES
 
-    // increment user warnings
-    db.get('users').find({ id }).assign({ warnings: warnings + 1 }).value()
-    updateWarnTime(id)
-    banUser(id, cooldownTime)
+  // increment user warnings
+  db.get('users').find({ id }).assign({ warnings: warnings + 1 }).value()
+  updateWarnTime(id)
+  banUser(id, cooldownTime)
 
-    return cooldownTime
+  return cooldownTime
 }
 
 export const rmWarning = (id) => {
-    // decrement user warnings
-    let warnings = getUserWarnings(id)
-    if (warnings > 0) {
-        db.get('users').find({ id }).assign({ warnings: warnings - 1 }).value()
-        updateWarnTime(id)
-    }
+  // decrement user warnings
+  let warnings = getUserWarnings(id)
+  if (warnings > 0) {
+    db.get('users').find({ id }).assign({ warnings: warnings - 1 }).value()
+    updateWarnTime(id)
+  }
 }
 
 export const updateWarnTime = (id) =>
-    db.get('users').find({ id }).assign({ warnUpdated: Date.now() }).value()
+  db.get('users').find({ id }).assign({ warnUpdated: Date.now() }).value()
 
 export const setLeft = (id, value) => {
-    db.get('users').find({ id }).assign({ left: value }).value()
+  db.get('users').find({ id }).assign({ left: value }).value()
 }
 
 export const banUser = (id, ms) =>

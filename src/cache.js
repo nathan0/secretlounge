@@ -26,7 +26,7 @@ export const setWarnedFlag = (id) => {
 
 export const hasWarnedFlag = (id) => {
   let { cacheId } = messageHistory[id]
-  return messageGroups[cacheId].warned ? true : false
+  return messageGroups[cacheId].warned
 }
 
 export const addUpvote = (msgId, userId) => {

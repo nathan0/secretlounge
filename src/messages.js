@@ -66,8 +66,8 @@ export const getUsername = (user) => {
 
 export const getRealnameFromEvent = (evt) => {
   if (evt && evt.raw && evt.raw.from) {
-    const { first_name, last_name } = evt.raw.from
-    return [first_name, last_name].filter(i => i).join(' ')
+    const { first_name: firstName, last_name: lastName } = evt.raw.from
+    return [firstName, lastName].filter(i => i).join(' ')
   }
 }
 
@@ -79,7 +79,7 @@ export const getUsernameFromEvent = (evt) => {
 
 export const stringifyTimestamp = (ts) =>
   (new Date(ts)).toUTCString()
-  
+
 export const obfuscateKarma = (karma) => {
   let offset = Math.round((karma * 0.2) + 2)
   return karma + Math.floor(Math.random() * (offset + 1) - offset)
@@ -90,15 +90,15 @@ export const usersText = (users) => {
   return `<b>${u.length}</b> <i>users:</i> ` + u.map(getUsername).join(', ')
 }
 
-export const infoText = (user) => !user ? '<i>user not found</i>' :
-  `<b>id:</b> ${obfuscateId(user.id)}, <b>username:</b> @${user.username}, ` +
+export const infoText = (user) => !user ? '<i>user not found</i>'
+  : `<b>id:</b> ${obfuscateId(user.id)}, <b>username:</b> @${user.username}, ` +
   `<b>rank:</b> ${user.rank} (${getRank(user.rank)}), ` +
   `<b>karma:</b> ${user.karma || 0}, ` +
-  `<b>warnings:</b> ${user.warnings || 0} ${generateSmiley(user.warnings)}${ user.warnings > 0 ? ` (one warning will be removed on ${stringifyTimestamp(user.warnUpdated + WARN_EXPIRE)})` : ''}, ` +
+  `<b>warnings:</b> ${user.warnings || 0} ${generateSmiley(user.warnings)}${user.warnings > 0 ? ` (one warning will be removed on ${stringifyTimestamp(user.warnUpdated + WARN_EXPIRE)})` : ''}, ` +
   `<b>cooldown:</b> ${user.banned >= Date.now() ? 'yes, until ' + stringifyTimestamp(user.banned) : 'no'}`
 
-export const modInfoText = (user) => !user ? '<i>user not found</i>' :
-  `<b>id:</b> ${obfuscateId(user.id)}, <b>username:</b> anonymous, ` +
+export const modInfoText = (user) => !user ? '<i>user not found</i>'
+  : `<b>id:</b> ${obfuscateId(user.id)}, <b>username:</b> anonymous, ` +
   `<b>rank:</b> n/a, ` +
   `<b>karma:</b> ${obfuscateKarma(user.karma || 0)}, ` +
   `<b>cooldown:</b> ${user.banned >= Date.now() ? 'yes, until ' + stringifyTimestamp(user.banned) : 'no'}`

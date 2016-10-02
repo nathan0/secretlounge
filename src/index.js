@@ -1,5 +1,5 @@
 import dude from 'debug-dude'
-const { /* debug, */ log, info, warn /* , error */ } = dude('bot')
+const { log, info, warn } = dude('bot')
 
 import { version } from '../package.json'
 info(`secretlounge v${version} starting`)

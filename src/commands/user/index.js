@@ -1,10 +1,9 @@
-import { getCacheGroup, getFromCache } from '../../cache'
 import { sendToAll } from '../../index'
 import {
   cursive, htmlMessage,
   getUsername,
   infoText, configSet, usersText,
-  USER_NOT_IN_CHAT, USER_LEFT_CHAT, ERR_NO_REPLY
+  USER_NOT_IN_CHAT, USER_LEFT_CHAT
 } from '../../messages'
 import { setLeft, getUsers, getSystemConfig, setDebugMode, setKarmaMode } from '../../db'
 import { version } from '../../../package.json'
@@ -79,7 +78,7 @@ export default function userCommands (user, evt, reply) {
     case 'togglekarma':
       const newKarmaMode = !user.hideKarma
       setKarmaMode(evt.user, newKarmaMode)
-      reply(configSet('karma notifications', !newKarmaMode))	
+      reply(configSet('karma notifications', !newKarmaMode))
       break
 
     case 'source':

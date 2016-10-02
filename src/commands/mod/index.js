@@ -1,25 +1,17 @@
 import dude from 'debug-dude'
-const { /*debug, log,*/ info /*, warn, error*/ } = dude('bot:commands:mod')
+const { info } = dude('bot:commands:mod')
 
-import { sendToAll, sendToUser, sendToMods } from '../../index'
+import { sendToAll, sendToUser } from '../../index'
 import { KARMA_PENALTY_WARN } from '../../constants'
 import {
-  cursive, htmlMessage,
-  modInfoText, getUsername
+  cursive, htmlMessage, handedCooldown, modInfoText, ALREADY_WARNED,
+  MESSAGE_DISAPPEARED, ERR_NO_REPLY
 } from '../../messages'
 import { getFromCache, getCacheGroup, setWarnedFlag, hasWarnedFlag } from '../../cache'
 import {
-  getUserByUsername, getUser, getUsers,
+  getUser, getUsers,
   addWarning, rmKarma
 } from '../../db'
-import { handedCooldown, ALREADY_WARNED, MESSAGE_DISAPPEARED, ERR_NO_REPLY } from '../../messages'
-import { RANKS } from '../../ranks'
-import { formatTime } from '../../time'
-
-const getReason = (evt) =>
-  evt.args.length > 0
-  ? ' (' + evt.args.join(' ') + ')'
-  : ''
 
 export default function modCommands (user, evt, reply) {
   const messageRepliedTo = getFromCache(evt, reply)
@@ -63,7 +55,7 @@ export default function modCommands (user, evt, reply) {
                 }
               })
             }
-          });
+          })
           sendToUser(messageRepliedTo.sender, {
             ...cursive(handedCooldown(cooldownTime, true)),
             options: {
