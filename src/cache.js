@@ -6,6 +6,10 @@ let messageHistory = {}
 let messageGroups = { length: 0 }
 
 export const getFromCache = (evt, reply) => {
+  if (!(evt && evt.raw && evt.raw.reply_to_message && evt.raw.reply_to_message.message_id)) {
+    return
+  }
+
   const messageRepliedTo = messageHistory[evt.raw.reply_to_message.message_id]
   if (!messageRepliedTo) {
     reply(cursive('sender not found in cache (it\'s been more than 24h or the bot has been restarted since the post)'))
