@@ -79,5 +79,6 @@ issues - report issues with this bot
 changelog - show the release history
 modhelp - show commands for mods
 adminhelp - show commands for admins
-debug - toggle debug mode (sends back all messages to you)
+toggleDebug - toggle debug mode (sends back all messages to you)
+toggleKarma - toggle karma notifications
 ```
