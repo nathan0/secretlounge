@@ -2,10 +2,12 @@
 
 _a bot to make an anonymous group chat on telegram, powered by [coffea](https://github.com/caffeinery/coffea)_
 
-[![https://i.imgur.com/m8V75N9.png](https://i.imgur.com/m8V75N9.png)](https://telegram.me/secretloungebot)
+![https://i.imgur.com/m8V75N9.png](http://i.imgur.com/GJbHrqO.png)
 
-Available as [@secretloungebot](https://telegram.me/secretloungebot) on [telegram](https://telegram.org/). **(BETA)**
-
+**![/a/ BETA](https://telegram.me/animeloungebot)** ~ japan / anime related chat (nsfw)
+**![/b/ BETA](https://telegram.me/secretloungebot)** ~ random (nsfw)
+**![/de/ BETA](https://telegram.me/germanloungebot)** ~ german chat (sfw)
+**![/gen/ BETA](https://telegram.me/generalloungebot)** ~ general chat (sfw) 
 
 ## Setup
 
