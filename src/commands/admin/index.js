@@ -47,8 +47,8 @@ export default function adminCommands (user, evt, reply) {
       if (evt && evt.raw && evt.raw.reply_to_message) {
         if (messageRepliedTo) {
           const user = getUser(messageRepliedTo.sender)
-          blacklistUser(user.id, evt.args.slice(1).join(' '))
-          sendToUser(user.id, blacklisted(evt.args.slice(1).join(' ')))
+          blacklistUser(user.id, evt.args.join(' '))
+          sendToUser(user.id, blacklisted(evt.args.join(' ')))
         }
       }
       break
