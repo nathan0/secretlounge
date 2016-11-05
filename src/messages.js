@@ -12,6 +12,7 @@ export const USER_JOINED_CHAT = 'joined the chat'
 export const USER_SPAMMING = 'your recent messages have been deemed spammy, if this is a false positive contact @omnidan or @hdrive'
 export const ALREADY_WARNED = 'a warning has already been issued for this message'
 export const MESSAGE_DISAPPEARED = 'this message disappeared into the ether'
+export const USER_WARNED = 'this user has been warned'
 
 export const handedCooldown = (duration, deleted = false) =>
   `you've been handed a cooldown of ${formatTime(duration)} for this message ${deleted ? '(message also deleted)' : ''}`

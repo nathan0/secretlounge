@@ -5,7 +5,7 @@ import { sendToAll, sendToUser } from '../../index'
 import { KARMA_PENALTY_WARN } from '../../constants'
 import {
   cursive, htmlMessage, handedCooldown, modInfoText, ALREADY_WARNED,
-  MESSAGE_DISAPPEARED, ERR_NO_REPLY
+  MESSAGE_DISAPPEARED, ERR_NO_REPLY, USER_WARNED
 } from '../../messages'
 import { getFromCache, getCacheGroup, setWarnedFlag, hasWarnedFlag } from '../../cache'
 import {
@@ -63,6 +63,7 @@ export default function modCommands (user, evt, reply) {
               parse_mode: 'HTML'
             }
           })
+          sendToUser(user.id, cursive(USER_WARNED))
         } else {
           reply(cursive(ALREADY_WARNED))
         }
@@ -84,6 +85,7 @@ export default function modCommands (user, evt, reply) {
               parse_mode: 'HTML'
             }
           })
+          sendToUser(user.id, cursive(USER_WARNED))
         } else {
           reply(cursive(ALREADY_WARNED))
         }
