@@ -21,6 +21,7 @@ export const KARMA_THANK_YOU = 'you just gave this user some sweet karma, awesom
 export const ALREADY_UPVOTED = 'you already upvoted this message'
 export const CANT_UPVOTE_OWN_MESSAGE = 'you can\'t upvote your own message'
 export const YOU_HAVE_KARMA = 'you\'ve just been given sweet karma! (check /info to see your karma, or /toggleKarma to turn these notifications off)'
+export const REJOINING_QUICKLY = 'you\'re rejoining too quickly - try again later'
 
 const parseValue = (val) => {
   if (typeof val === 'boolean') return val ? 'on' : 'off'

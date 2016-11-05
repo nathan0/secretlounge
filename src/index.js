@@ -15,7 +15,7 @@ import {
   stringifyTimestamp, blacklisted,
   USER_NOT_IN_CHAT, USER_IN_CHAT, USER_BANNED_FROM_CHAT, USER_JOINED_CHAT,
   USER_SPAMMING, ERR_NO_REPLY, ALREADY_UPVOTED, CANT_UPVOTE_OWN_MESSAGE,
-  KARMA_THANK_YOU, YOU_HAVE_KARMA
+  KARMA_THANK_YOU, YOU_HAVE_KARMA, REJOINING_QUICKLY
 } from './messages'
 import { RANKS } from './ranks'
 import {
@@ -278,7 +278,9 @@ networks.on('command', (evt, reply) => {
   if (user && user.rank < 0) return reply(cursive(blacklisted(user && user.reason)))
 
   if (evt && evt.cmd === 'start') {
+    let userLeft = user && user.left ? new Date(user && user.left) : null
     if (isActive(user)) return reply(cursive(USER_IN_CHAT))
+    else if (userLeft && userLeft.setHour(userLeft.getHour() + 1) > new Date()) return reply(cursive(REJOINING_QUICKLY))
     else if (!user) addUser(evt.user)
     else rejoinUser(evt.user)
 

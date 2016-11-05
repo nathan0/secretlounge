@@ -42,7 +42,7 @@ export default function userCommands (user, evt, reply) {
       sendToAll(htmlMessage(
         `${getUsername(user)} <i>${USER_LEFT_CHAT}</i>`
       ))
-      setLeft(user.id, true)
+      setLeft(user.id, new Date().getTime())
       break
 
     case 'users':
