@@ -14,8 +14,9 @@ export const ALREADY_WARNED = 'a warning has already been issued for this messag
 export const MESSAGE_DISAPPEARED = 'this message disappeared into the ether'
 export const USER_WARNED = 'this user has been warned'
 
-export const handedCooldown = (duration, deleted = false) =>
-  `you've been handed a cooldown of ${formatTime(duration)} for this message ${deleted ? '(message also deleted)' : ''}`
+export const handedCooldown = (duration, reason, deleted) =>
+  `<b>cooldown (${formatTime(duration)}) ${deleted ? '(original deleted)' : ''}</b>
+<i>you've been given a cooldown for this message ${reason ? '(reason: ' + reason + ')' : ''}</i>`
 
 export const KARMA_THANK_YOU = 'you just gave this user some sweet karma, awesome!'
 export const ALREADY_UPVOTED = 'you already upvoted this message'

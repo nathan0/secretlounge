@@ -41,6 +41,7 @@ export default function modCommands (user, evt, reply) {
       if (messageRepliedTo) {
         if (!hasWarnedFlag(msgId)) {
           const cooldownTime = addWarning(messageRepliedTo.sender)
+          const reason = evt && evt.args && evt.args.join(' ')
           rmKarma(messageRepliedTo.sender, KARMA_PENALTY_WARN)
           setWarnedFlag(msgId)
           getUsers().map((user) => {
@@ -57,7 +58,7 @@ export default function modCommands (user, evt, reply) {
             }
           })
           sendToUser(messageRepliedTo.sender, {
-            ...cursive(handedCooldown(cooldownTime, true)),
+            ...htmlMessage(handedCooldown(cooldownTime, reason, true)),
             options: {
               reply_to_message_id: msgId,
               parse_mode: 'HTML'
@@ -76,10 +77,11 @@ export default function modCommands (user, evt, reply) {
       if (messageRepliedTo) {
         if (!hasWarnedFlag(msgId)) {
           const cooldownTime = addWarning(messageRepliedTo.sender)
+          const reason = evt && evt.args && evt.args.join(' ')
           rmKarma(messageRepliedTo.sender, KARMA_PENALTY_WARN)
           setWarnedFlag(msgId)
           sendToUser(messageRepliedTo.sender, {
-            ...cursive(handedCooldown(cooldownTime)),
+            ...htmlMessage(handedCooldown(cooldownTime, reason)),
             options: {
               reply_to_message_id: msgId,
               parse_mode: 'HTML'
