@@ -13,6 +13,7 @@ export const USER_SPAMMING = 'your recent messages have been deemed spammy, if t
 export const ALREADY_WARNED = 'a warning has already been issued for this message'
 export const MESSAGE_DISAPPEARED = 'this message disappeared into the ether'
 
+export const blacklisted = (reason) => `you've been blacklisted for ${reason || '(reason not specified)'}`
 export const handedCooldown = (duration, deleted = false) =>
   `you've been handed a cooldown of ${formatTime(duration)} for this message ${deleted ? '(message also deleted)' : ''}`
 
@@ -20,6 +21,7 @@ export const KARMA_THANK_YOU = 'you just gave this user some sweet karma, awesom
 export const ALREADY_UPVOTED = 'you already upvoted this message'
 export const CANT_UPVOTE_OWN_MESSAGE = 'you can\'t upvote your own message'
 export const YOU_HAVE_KARMA = 'you\'ve just been given sweet karma! (check /info to see your karma, or /toggleKarma to turn these notifications off)'
+export const REJOINING_QUICKLY = 'you\'re rejoining too quickly - try again later'
 
 const parseValue = (val) => {
   if (typeof val === 'boolean') return val ? 'on' : 'off'
@@ -85,9 +87,10 @@ export const obfuscateKarma = (karma) => {
   return karma + Math.floor(Math.random() * (offset + 1) - offset)
 }
 
-export const usersText = (users) => {
+export const usersText = (users, showNames) => {
   let u = users.filter(isActive)
-  return `<b>${u.length}</b> <i>users:</i> ` + u.map(getUsername).join(', ')
+  if (showNames) return `<b>${u.length}</b> <i>users:</i> ` + u.map(getUsername).join(', ')
+  return `<b>${u.length}</b> <i>users.</i>`
 }
 
 export const infoText = (user) => !user ? '<i>user not found</i>'
