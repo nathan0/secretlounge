@@ -13,6 +13,7 @@ export const USER_SPAMMING = 'your recent messages have been deemed spammy, if t
 export const ALREADY_WARNED = 'a warning has already been issued for this message'
 export const MESSAGE_DISAPPEARED = 'this message disappeared into the ether'
 
+export const blacklisted = (reason) => `you've been blacklisted for ${reason || '(reason not specified)'}`
 export const handedCooldown = (duration, deleted = false) =>
   `you've been handed a cooldown of ${formatTime(duration)} for this message ${deleted ? '(message also deleted)' : ''}`
 

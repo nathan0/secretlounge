@@ -31,7 +31,10 @@ export default function userCommands (user, evt, reply) {
   /adminsay [message] - send an official moderator message
   /motd [message] - set the message of the day
   /mod [username] - grant a user moderator rank
-  /admin [username] - grand a user admin rank`))
+  /admin [username] - grand a user admin rank
+
+<i>or reply to the message and use:</i>
+  /blacklist [reason] - blacklist the user who posted this message`))
       break
 
     case 'stop':

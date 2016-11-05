@@ -13,6 +13,7 @@ export const getKarma = (id) => {
 export const addKarma = (id, val = 1) => db.get('users').find({ id }).assign({ karma: getKarma(id) + val }).value()
 export const rmKarma = (id, val = 1) => db.get('users').find({ id }).assign({ karma: getKarma(id) - val }).value()
 
+export const blacklistUser = (id, reason) => db.get('users').find({ id }).assign({ left: true, rank: -10, reason }).value()
 export const getUser = (id) => db.get('users').find({ id }).value()
 export const getUserByUsername = (username) => db.get('users').find({ username }).value()
 export const addUser = (id) => db.get('users').push({ id, rank: 0, version, left: false }).value()

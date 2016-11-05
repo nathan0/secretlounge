@@ -2,11 +2,14 @@ import dude from 'debug-dude'
 const { info } = dude('bot:commands:admin')
 
 import { sendToAll, sendToUser } from '../../index'
-import { htmlMessage, configSet } from '../../messages'
-import { setMotd, setRank, getUserByUsername } from '../../db'
+import { cursive, htmlMessage, configSet, blacklisted } from '../../messages'
+import { getFromCache } from '../../cache'
+import { setMotd, setRank, getUser, getUserByUsername, blacklistUser } from '../../db'
 import { RANKS } from '../../ranks'
 
 export default function adminCommands (user, evt, reply) {
+  const messageRepliedTo = getFromCache(evt, reply)
+
   switch (evt.cmd) {
     case 'motd':
       const motd = evt.args.join(' ')
@@ -37,6 +40,17 @@ export default function adminCommands (user, evt, reply) {
         htmlMessage('<i>you\'ve been promoted to admin, run</i> /adminhelp <i>for a list of commands</i>')
       )
       reply(htmlMessage(`<i>made</> @${evt.args[0]} <i>an admin</i>`))
+      break
+
+    case 'blacklist':
+      if (evt.args.length !== 1) return reply(cursive('please specify a reason for the blacklist'))
+      if (evt && evt.raw && evt.raw.reply_to_message) {
+        if (messageRepliedTo) {
+          const user = getUser(messageRepliedTo.sender)
+          blacklistUser(user.id, evt.args.slice(1).join(' '))
+          sendToUser(user.id, blacklisted(evt.args.slice(1).join(' ')))
+        }
+      }
       break
 
     case 'adminsay':

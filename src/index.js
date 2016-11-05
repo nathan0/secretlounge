@@ -12,7 +12,7 @@ const networks = connect(config)
 import {
   htmlMessage, cursive,
   getUsername, getUsernameFromEvent, getRealnameFromEvent,
-  stringifyTimestamp,
+  stringifyTimestamp, blacklisted,
   USER_NOT_IN_CHAT, USER_IN_CHAT, USER_BANNED_FROM_CHAT, USER_JOINED_CHAT,
   USER_SPAMMING, ERR_NO_REPLY, ALREADY_UPVOTED, CANT_UPVOTE_OWN_MESSAGE,
   KARMA_THANK_YOU, YOU_HAVE_KARMA
@@ -148,6 +148,9 @@ export const sendToAdmins = (rawEvent) =>
 
 const relay = (type) => {
   networks.on(type, (evt, reply) => {
+    const user = getUser(evt.user)
+    if (user && user.rank < 0) return reply(cursive(blacklisted(user && user.reason)))
+
     if (type !== 'message' || (evt && evt.text && evt.text.charAt(0) !== '/')) { // don't parse commands again
       if ((evt && evt.text === '+1') && (evt && evt.raw && evt.raw.reply_to_message)) {
         return handleKarma(evt, reply)
@@ -272,6 +275,7 @@ networks.on('command', (evt, reply) => {
 
   const user = getUser(evt.user)
   if (evt && evt.cmd) evt.cmd = evt.cmd.toLowerCase()
+  if (user && user.rank < 0) return reply(cursive(blacklisted(user && user.reason)))
 
   if (evt && evt.cmd === 'start') {
     if (isActive(user)) return reply(cursive(USER_IN_CHAT))
