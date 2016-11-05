@@ -85,9 +85,10 @@ export const obfuscateKarma = (karma) => {
   return karma + Math.floor(Math.random() * (offset + 1) - offset)
 }
 
-export const usersText = (users) => {
+export const usersText = (users, showNames) => {
   let u = users.filter(isActive)
-  return `<b>${u.length}</b> <i>users:</i> ` + u.map(getUsername).join(', ')
+  if (showNames) return `<b>${u.length}</b> <i>users:</i> ` + u.map(getUsername).join(', ')
+  return `<b>${u.length}</b> <i>users.</i>`
 }
 
 export const infoText = (user) => !user ? '<i>user not found</i>'

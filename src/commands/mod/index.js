@@ -4,7 +4,7 @@ const { info } = dude('bot:commands:mod')
 import { sendToAll, sendToUser } from '../../index'
 import { KARMA_PENALTY_WARN } from '../../constants'
 import {
-  cursive, htmlMessage, handedCooldown, modInfoText, ALREADY_WARNED,
+  cursive, htmlMessage, usersText, handedCooldown, modInfoText, ALREADY_WARNED,
   MESSAGE_DISAPPEARED, ERR_NO_REPLY
 } from '../../messages'
 import { getFromCache, getCacheGroup, setWarnedFlag, hasWarnedFlag } from '../../cache'
@@ -22,6 +22,13 @@ export default function modCommands (user, evt, reply) {
       if (evt.args.length <= 0) return reply(cursive('please specify a message, e.g. /modsay message'))
       info('%o sent mod message -> %s', user, evt.args.join(' '))
       sendToAll(htmlMessage(evt.args.join(' ') + ' <b>~mods</b>'))
+      break
+
+    case 'users':
+      const users = getUsers()
+      reply(htmlMessage(
+        usersText(users, true)
+      ))
       break
 
     case 'info':
