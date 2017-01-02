@@ -283,6 +283,8 @@ networks.on('command', (evt, reply) => {
     else if (!user) addUser(evt.user)
     else rejoinUser(evt.user)
 
+    reply(user, cursive('You joined the chat!'))
+
     const newUser = updateUserFromEvent(evt)
 
     // make first user admin
