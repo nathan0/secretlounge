@@ -39,9 +39,6 @@ export default function userCommands (user, evt, reply) {
 
     case 'stop':
       if (!user || user.left) return reply(cursive(USER_NOT_IN_CHAT))
-      sendToAll(htmlMessage(
-        `${getUsername(user)} <i>${USER_LEFT_CHAT}</i>`
-      ))
       setLeft(user.id, new Date().getTime())
       break
 
