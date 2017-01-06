@@ -280,15 +280,12 @@ networks.on('command', (evt, reply) => {
   if (evt && evt.cmd === 'start') {
     let userLeft = user && user.left ? new Date(user && user.left) : null
     if (isActive(user)) return reply(cursive(USER_IN_CHAT))
-    else if (userLeft && userLeft.setHour(userLeft.getHour() + 1) > new Date()) return reply(cursive(REJOINING_QUICKLY))
     else if (!user) addUser(evt.user)
     else rejoinUser(evt.user)
 
-    const newUser = updateUserFromEvent(evt)
+    reply(user, cursive('You joined the chat!'))
 
-    sendToAll(htmlMessage(
-      `${getUsername(newUser)} <i>${USER_JOINED_CHAT}</i>`
-    ))
+    const newUser = updateUserFromEvent(evt)
 
     // make first user admin
     if (getUsers().length === 1) setRank(evt.user, RANKS.admin)
