@@ -43,7 +43,7 @@ export default function adminCommands (user, evt, reply) {
       break
 
     case 'blacklist':
-      if (evt.args.length !== 1) return reply(cursive('please specify a reason for the blacklist'))
+      if (evt.args.length < 1) return reply(cursive('please specify a reason for the blacklist'))
       if (evt && evt.raw && evt.raw.reply_to_message) {
         if (messageRepliedTo) {
           const user = getUser(messageRepliedTo.sender)
