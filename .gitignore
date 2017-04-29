@@ -40,3 +40,6 @@ config.json
 
 # bot database
 db.json
+
+
+.tern-port

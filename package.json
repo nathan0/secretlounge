@@ -46,6 +46,7 @@
     "babel-register": "^6.5.2",
     "babel-watch": "^2.0.2",
     "cross-env": "^1.0.7",
+    "eslint": "^3.19.0",
     "eslint-config-standard": "6.2.0",
     "eslint-plugin-promise": "2.0.1",
     "eslint-plugin-standard": "2.0.1",
