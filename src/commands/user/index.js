@@ -39,7 +39,7 @@ export default function userCommands (user, evt, reply) {
 
     case 'stop':
       if (!user || user.left) return reply(cursive(USER_NOT_IN_CHAT))
-      reply(cusrive('You left the chat!'))
+      reply(cursive('You left the chat!'))
       setLeft(user.id, new Date().getTime())
       break
 
