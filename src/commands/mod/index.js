@@ -47,19 +47,16 @@ export default function modCommands (user, evt, reply) {
 
       if (messageRepliedTo) {
         if (!hasWarnedFlag(msgId)) {
+          info('%o deleted message', user)
           const cooldownTime = addWarning(messageRepliedTo.sender)
           rmKarma(messageRepliedTo.sender, KARMA_PENALTY_WARN)
           setWarnedFlag(msgId)
           getUsers().map((user) => {
             if (messageRepliedTo.sender !== user.id) {
               reply({
-                ...cursive(MESSAGE_DISAPPEARED),
-                type: 'editMessageText',
+                type: 'deleteMessage',
                 chat: user.id,
-                id: replyCache && replyCache[user.id],
-                options: {
-                  parse_mode: 'HTML'
-                }
+                messageId: replyCache && replyCache[user.id]
               })
             }
           })
@@ -70,6 +67,7 @@ export default function modCommands (user, evt, reply) {
               parse_mode: 'HTML'
             }
           })
+          reply(cursive('deleted message'))
         } else {
           reply(cursive(ALREADY_WARNED))
         }
@@ -81,6 +79,7 @@ export default function modCommands (user, evt, reply) {
     case 'warn':
       if (messageRepliedTo) {
         if (!hasWarnedFlag(msgId)) {
+          info('%o warned message', user)
           const cooldownTime = addWarning(messageRepliedTo.sender)
           rmKarma(messageRepliedTo.sender, KARMA_PENALTY_WARN)
           setWarnedFlag(msgId)
@@ -91,6 +90,7 @@ export default function modCommands (user, evt, reply) {
               parse_mode: 'HTML'
             }
           })
+          reply(cursive('warned message'))
         } else {
           reply(cursive(ALREADY_WARNED))
         }

@@ -47,6 +47,15 @@ export default function adminCommands (user, evt, reply) {
       if (evt && evt.raw && evt.raw.reply_to_message) {
         if (messageRepliedTo) {
           const user = getUser(messageRepliedTo.sender)
+          getUsers().map((user) => {
+            if (messageRepliedTo.sender !== user.id) {
+              reply({
+                type: 'deleteMessage',
+                chat: user.id,
+                messageId: replyCache && replyCache[user.id]
+              })
+            }
+          })
           blacklistUser(user.id, evt.args.join(' '))
           sendToUser(user.id, blacklisted(evt.args.join(' ')))
         }

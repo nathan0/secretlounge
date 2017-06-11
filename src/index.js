@@ -278,12 +278,11 @@ networks.on('command', (evt, reply) => {
   if (user && user.rank < 0) return reply(cursive(blacklisted(user && user.reason)))
 
   if (evt && evt.cmd === 'start') {
-    let userLeft = user && user.left ? new Date(user && user.left) : null
     if (isActive(user)) return reply(cursive(USER_IN_CHAT))
     else if (!user) addUser(evt.user)
     else rejoinUser(evt.user)
 
-    reply(user, cursive('You joined the chat!'))
+    reply(cursive('You joined the chat!'))
 
     const newUser = updateUserFromEvent(evt)
 
