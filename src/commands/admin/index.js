@@ -52,10 +52,7 @@ export default function adminCommands (user, evt, reply) {
               reply({
                 type: 'deleteMessage',
                 chat: user.id,
-                id: replyCache && replyCache[user.id],
-                options: {
-                  parse_mode: 'HTML'
-                }
+                messageId: replyCache && replyCache[user.id]
               })
             }
           })
