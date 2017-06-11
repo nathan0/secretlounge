@@ -54,7 +54,7 @@
   },
   "dependencies": {
     "coffea": "1.0.0-beta18",
-    "coffea-telegram": "1.0.0-beta9-3",
+    "coffea-telegram": "^1.0.0-beta9-6",
     "debug-dude": "^1.0.3",
     "lowdb": "^0.13.1"
   }

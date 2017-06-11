@@ -53,8 +53,7 @@ export default function modCommands (user, evt, reply) {
           getUsers().map((user) => {
             if (messageRepliedTo.sender !== user.id) {
               reply({
-                ...cursive(MESSAGE_DISAPPEARED),
-                type: 'editMessageText',
+                type: 'deleteMessage',
                 chat: user.id,
                 id: replyCache && replyCache[user.id],
                 options: {
