@@ -46,20 +46,13 @@ export default function modCommands (user, evt, reply) {
       let replyCache = getCacheGroup(msgId)
 
       if (messageRepliedTo) {
+        info('%o deleted message', user)
         if (!hasWarnedFlag(msgId)) {
-          info('%o deleted message', user)
           const cooldownTime = addWarning(messageRepliedTo.sender)
+
           rmKarma(messageRepliedTo.sender, KARMA_PENALTY_WARN)
           setWarnedFlag(msgId)
-          getUsers().map((user) => {
-            if (messageRepliedTo.sender !== user.id) {
-              reply({
-                type: 'deleteMessage',
-                chat: user.id,
-                messageId: replyCache && replyCache[user.id]
-              })
-            }
-          })
+
           sendToUser(messageRepliedTo.sender, {
             ...cursive(handedCooldown(cooldownTime, true)),
             options: {
@@ -67,10 +60,17 @@ export default function modCommands (user, evt, reply) {
               parse_mode: 'HTML'
             }
           })
-          reply(cursive('deleted message'))
-        } else {
-          reply(cursive(ALREADY_WARNED))
         }
+        getUsers().map((user) => {
+          if (messageRepliedTo.sender !== user.id) {
+            reply({
+              type: 'deleteMessage',
+              chat: user.id,
+              messageId: replyCache && replyCache[user.id]
+            })
+          }
+        })
+        reply(cursive('deleted message'))
       } else {
         reply(cursive(ERR_NO_REPLY))
       }
