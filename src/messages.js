@@ -9,7 +9,7 @@ export const USER_IN_CHAT = 'you\'re already in the chat!'
 export const USER_BANNED_FROM_CHAT = 'your cooldown expires at'
 export const USER_LEFT_CHAT = 'left the chat'
 export const USER_JOINED_CHAT = 'joined the chat'
-export const USER_SPAMMING = 'your recent messages have been deemed spammy, if this is a false positive contact @omnidan or @hdrive'
+export const USER_SPAMMING = 'avoid sending messages too fast. your message has not been sent, try again later.'
 export const ALREADY_WARNED = 'a warning has already been issued for this message'
 export const MESSAGE_DISAPPEARED = 'this message disappeared into the ether'
 
