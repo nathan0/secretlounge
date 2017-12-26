@@ -10,6 +10,8 @@ _a bot to make an anonymous group chat on telegram, powered by [coffea](https://
 
 **[/de/ BETA](https://telegram.me/germanloungebot)** ~ german chat (sfw)
 
+**[/bier/ BETA](https://telegram.me/bierloungebot)** ~ german nsfw chat (nsfw)
+
 **[/gen/ BETA](https://telegram.me/generalloungebot)** ~ general chat (sfw) 
 
 ## Setup
