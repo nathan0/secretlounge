@@ -9,7 +9,6 @@ import { RANKS } from '../../ranks'
 
 export default function adminCommands (user, evt, reply) {
   const messageRepliedTo = getFromCache(evt, reply)
-  const msgId = evt && evt.raw && evt.raw.reply_to_message && evt.raw.reply_to_message.message_id
 
   switch (evt.cmd) {
     case 'motd':
