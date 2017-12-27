@@ -3,12 +3,13 @@ const { info } = dude('bot:commands:admin')
 
 import { sendToAll, sendToUser } from '../../index'
 import { cursive, htmlMessage, configSet, blacklisted } from '../../messages'
-import { getFromCache } from '../../cache'
-import { setMotd, setRank, getUser, getUserByUsername, blacklistUser } from '../../db'
+import { getFromCache, getCacheGroup } from '../../cache'
+import { setMotd, setRank, getUser, getUsers, getUserByUsername, blacklistUser } from '../../db'
 import { RANKS } from '../../ranks'
 
 export default function adminCommands (user, evt, reply) {
   const messageRepliedTo = getFromCache(evt, reply)
+  const msgId = evt && evt.raw && evt.raw.reply_to_message && evt.raw.reply_to_message.message_id
 
   switch (evt.cmd) {
     case 'motd':
@@ -43,9 +44,11 @@ export default function adminCommands (user, evt, reply) {
       break
 
     case 'blacklist':
+      let replyCache
       if (evt.args.length < 1) return reply(cursive('please specify a reason for the blacklist'))
       if (evt && evt.raw && evt.raw.reply_to_message) {
         if (messageRepliedTo) {
+          replyCache = getCacheGroup(evt.raw.reply_to_message.message_id)
           const user = getUser(messageRepliedTo.sender)
           getUsers().map((user) => {
             if (messageRepliedTo.sender !== user.id) {
